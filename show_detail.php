@@ -1,29 +1,49 @@
 <?php 
-    $subject = "This is my UDID from iOS device";
-    $body  = "Hello<br /> This is my UDID: {$_GET['UDID']} <br />";
-    $body .= "Device product: {$_GET['DEVICE_PRODUCT']} <br />";
-    $body .= "Device version: {$_GET['DEVICE_VERSION']} <br />";
-    $body .= "Device name: {$_GET['DEVICE_NAME']} <br />";
+    $udid    = isset($_GET['UDID']) ? htmlspecialchars($_GET['UDID']) : 'N/A';
+    $product = isset($_GET['DEVICE_PRODUCT']) ? htmlspecialchars($_GET['DEVICE_PRODUCT']) : 'N/A';
+    $version = isset($_GET['DEVICE_VERSION']) ? htmlspecialchars($_GET['DEVICE_VERSION']) : 'N/A';
+    $name    = isset($_GET['DEVICE_NAME']) ? htmlspecialchars($_GET['DEVICE_NAME']) : 'N/A';
+    $serial  = isset($_GET['SERIAL']) && $_GET['SERIAL'] !== '' ? htmlspecialchars($_GET['SERIAL']) : 'N/A (iOS Restricted)';
+    $imei    = isset($_GET['IMEI']) && $_GET['IMEI'] !== '' ? htmlspecialchars($_GET['IMEI']) : 'N/A (iOS Restricted)';
+    $iccid   = isset($_GET['ICCID']) && $_GET['ICCID'] !== '' ? htmlspecialchars($_GET['ICCID']) : 'N/A (iOS Restricted)';
+    $mac     = isset($_GET['MAC_ADDRESS_EN0']) && $_GET['MAC_ADDRESS_EN0'] !== '' ? htmlspecialchars($_GET['MAC_ADDRESS_EN0']) : 'N/A (iOS Restricted)';
+
+    $subject = "Device Information from iOS Device";
+    $body  = "Hello,\nThis is my device information:\n";
+    $body .= "UDID: {$udid}\n";
+    $body .= "Device Name: {$name}\n";
+    $body .= "Product: {$product}\n";
+    $body .= "Version: {$version}\n";
+    $body .= "Serial Number: {$serial}\n";
+    $body .= "IMEI: {$imei}\n";
+
+    $mailto_subject = rawurlencode($subject);
+    $mailto_body    = rawurlencode($body);
 ?>
 <!DOCTYPE html>
 <html>
     <head>
         <meta charset="utf-8">
-        <title>UDID</title>
-        <meta name="viewport" content="width=device-width" />
+        <title>Device Details</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     </head>
     <body>
         <div>
-            <h1>Knowing the UDID of my iOS device</h1>
-                <p>UDID: <?php echo $_GET['UDID']; ?></p>
-                <p>Device product: <?php echo $_GET['DEVICE_PRODUCT']; ?></p>
-                <p>Device version: <?php echo $_GET['DEVICE_VERSION']; ?></p>
-                <p>Device name: <?php echo $_GET['DEVICE_NAME']; ?></p>
+            <h1>iOS Device Details</h1>
+            <p><strong>UDID:</strong> <?php echo $udid; ?></p>
+            <p><strong>Device Name:</strong> <?php echo $name; ?></p>
+            <p><strong>Product:</strong> <?php echo $product; ?></p>
+            <p><strong>iOS Version:</strong> <?php echo $version; ?></p>
+            <p><strong>Serial Number:</strong> <?php echo $serial; ?></p>
+            <p><strong>IMEI:</strong> <?php echo $imei; ?></p>
+            <p><strong>ICCID (SIM):</strong> <?php echo $iccid; ?></p>
+            <p><strong>Wi-Fi MAC Address:</strong> <?php echo $mac; ?></p>
 
-                <p>Step 2: Send the information by email:</p>
-                <p>
-                    <a href="mailto:?subject=<?php echo $subject ?>&body=<?php echo $body?>">Give me tap</a>
-                </p>
+            <hr />
+            <p>Send details via email:</p>
+            <p>
+                <a href="mailto:?subject=<?php echo $mailto_subject; ?>&body=<?php echo $mailto_body; ?>">Send Mail</a>
+            </p>
         </div>
     </body>
 </html>
