@@ -138,7 +138,6 @@
             font-size: 12px;
             word-break: break-all;
             cursor: pointer;
-            transition: background 0.2s ease, transform 0.1s ease;
             -webkit-user-select: text;
             user-select: text;
             outline: none; /* เอาขอบน้ำเงินเวลากดเลือกออก */
@@ -148,12 +147,12 @@
             text-decoration: none !important;
             pointer-events: none !important;
         }
-        /* เอาเปลี่ยนสีขอบ (border-color) ตอนกดออก คงไว้เฉพาะการยุบตัวเบาๆ และเปลี่ยนสีพื้นหลัง */
+        /* 🟢 ลบการย่อขยาย (scale) ลบการเปลี่ยนสีออกทั้งหมดเวลากดค้าง */
         .field-box:active, .field-box:focus {
-            transform: scale(0.98);
-            background: #1f242c;
-            border-color: #30363d; /* คงสีขอบเดิมไว้ */
+            background: #0d1117;
+            border-color: #30363d;
             outline: none;
+            transform: none;
         }
         .btn {
             display: block;
