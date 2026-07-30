@@ -1,15 +1,31 @@
 <?php 
     $udid    = isset($_GET['UDID']) && $_GET['UDID'] !== '' ? htmlspecialchars($_GET['UDID']) : 'N/A';
-    $product = isset($_GET['DEVICE_PRODUCT']) && $_GET['DEVICE_PRODUCT'] !== '' ? htmlspecialchars($_GET['DEVICE_PRODUCT']) : 'N/A';
-    $version = isset($_GET['DEVICE_VERSION']) && $_GET['DEVICE_VERSION'] !== '' ? htmlspecialchars($_GET['DEVICE_VERSION']) : 'N/A';
-    $name    = isset($_GET['DEVICE_NAME']) && $_GET['DEVICE_NAME'] !== '' ? htmlspecialchars($_GET['DEVICE_NAME']) : 'N/A';
+    $imei    = isset($_GET['IMEI']) && $_GET['IMEI'] !== '' ? htmlspecialchars($_GET['IMEI']) : 'N/A';
+    $serial  = isset($_GET['SERIAL']) && $_GET['SERIAL'] !== '' ? htmlspecialchars($_GET['SERIAL']) : 'N/A';
+
+    // ดึงค่า Product และ Version มาเชื่อมกันในช่องเดียว
+    $product = isset($_GET['DEVICE_PRODUCT']) ? htmlspecialchars($_GET['DEVICE_PRODUCT']) : '';
+    $version = isset($_GET['DEVICE_VERSION']) ? htmlspecialchars($_GET['DEVICE_VERSION']) : '';
+
+    // ถ้ามีการส่งค่า PRODUCT_VERSION แบบรวมมาจาก processes_data.php แล้ว ให้ใช้ค่านั้นได้เลย
+    if (isset($_GET['PRODUCT_VERSION']) && $_GET['PRODUCT_VERSION'] !== '') {
+        $product_version = htmlspecialchars($_GET['PRODUCT_VERSION']);
+    } else {
+        if ($product !== '' && $version !== '') {
+            $product_version = "{$product} / {$version}";
+        } elseif ($product !== '') {
+            $product_version = $product;
+        } else {
+            $product_version = 'N/A';
+        }
+    }
 
     $subject = "This is my UDID from iOS device";
     $body  = "Hello,\n\nThis is my iOS Device Information:\n";
     $body .= "UDID: {$udid}\n";
-    $body .= "Device Product: {$product}\n";
-    $body .= "Device Version: {$version}\n";
-    $body .= "Device Name: {$name}\n";
+    $body .= "IMEI: {$imei}\n";
+    $body .= "Product / Version: {$product_version}\n";
+    $body .= "Serial: {$serial}\n";
 
     $mailto_subject = rawurlencode($subject);
     $mailto_body    = rawurlencode($body);
@@ -173,6 +189,7 @@
             <h1 class="main-heading">iOS Device Details</h1>
             <p class="sub-text">Tap any field to copy to clipboard</p>
 
+            <!-- 1. UDID -->
             <div class="field-group">
                 <div class="field-label">UDID</div>
                 <div class="field-box" onclick="copyText('<?php echo $udid; ?>')">
@@ -180,24 +197,27 @@
                 </div>
             </div>
 
+            <!-- 2. IMEI -->
             <div class="field-group">
-                <div class="field-label">Device Product</div>
-                <div class="field-box" onclick="copyText('<?php echo $product; ?>')">
-                    <?php echo $product; ?>
+                <div class="field-label">IMEI</div>
+                <div class="field-box" onclick="copyText('<?php echo $imei; ?>')">
+                    <?php echo $imei; ?>
                 </div>
             </div>
 
+            <!-- 3. PRODUCT / VERSION -->
             <div class="field-group">
-                <div class="field-label">Device Version</div>
-                <div class="field-box" onclick="copyText('<?php echo $version; ?>')">
-                    <?php echo $version; ?>
+                <div class="field-label">PRODUCT / VERSION</div>
+                <div class="field-box" onclick="copyText('<?php echo $product_version; ?>')">
+                    <?php echo $product_version; ?>
                 </div>
             </div>
 
+            <!-- 4. SERIAL -->
             <div class="field-group">
-                <div class="field-label">Device Name</div>
-                <div class="field-box" onclick="copyText('<?php echo $name; ?>')">
-                    <?php echo $name; ?>
+                <div class="field-label">SERIAL</div>
+                <div class="field-box" onclick="copyText('<?php echo $serial; ?>')">
+                    <?php echo $serial; ?>
                 </div>
             </div>
 
