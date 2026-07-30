@@ -35,7 +35,8 @@
 <head>
     <meta charset="utf-8">
     <title>TERMINAL // DEVICE LOG</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- เพิ่ม viewport-fit=cover เพื่อรองรับหน้าจอ iPhone รอยแหว่ง -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     
     <!-- 🟢 ป้องกัน iOS แอบแปลงตัวเลขเป็นเบอร์โทรศัพท์ -->
     <meta name="format-detection" content="telephone=no">
@@ -48,6 +49,10 @@
             margin: 0;
             padding: 0;
         }
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
         body {
             background-color: #0d1117;
             color: #3fb950;
@@ -56,7 +61,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            
+            /* 🟢 แก้ปัญหา Safari Toolbar ดันหน้าจอเบี้ยว */
             min-height: 100vh;
+            min-height: -webkit-fill-available;
+            min-height: 100dvh; /* Dynamic Viewport Height สำหรับเบราว์เซอร์ยุคใหม่ */
         }
         .terminal-card {
             background: #161b22;
@@ -66,6 +75,7 @@
             max-width: 480px;
             box-shadow: 0 0 25px rgba(63, 185, 80, 0.15);
             overflow: hidden;
+            margin: auto; /* การันตีว่าอยู่ตรงกลางเสมอ */
         }
         .terminal-header {
             background: #21262d;
@@ -142,7 +152,7 @@
             -webkit-user-select: text;
             user-select: text;
         }
-        /* 🟢 ดักทางเอาขีดใต้และสไตล์ลิงก์ของ Safari ออก */
+        /* 🟢 เอาขีดใต้และสไตล์ลิงก์ของ Safari ออก */
         .field-box a {
             color: inherit !important;
             text-decoration: none !important;
