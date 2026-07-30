@@ -36,6 +36,12 @@
     <meta charset="utf-8">
     <title>TERMINAL // DEVICE LOG</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- 🟢 ป้องกัน iOS แอบแปลงตัวเลขเป็นเบอร์โทรศัพท์ -->
+    <meta name="format-detection" content="telephone=no">
+    <meta name="format-detection" content="date=no">
+    <meta name="format-detection" content="address=no">
+
     <style>
         * {
             box-sizing: border-box;
@@ -133,6 +139,14 @@
             word-break: break-all;
             cursor: pointer;
             transition: all 0.2s ease;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+        /* 🟢 ดักทางเอาขีดใต้และสไตล์ลิงก์ของ Safari ออก */
+        .field-box a {
+            color: inherit !important;
+            text-decoration: none !important;
+            pointer-events: none !important;
         }
         .field-box:active {
             transform: scale(0.98);
