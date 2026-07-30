@@ -35,10 +35,9 @@
 <head>
     <meta charset="utf-8">
     <title>TERMINAL // DEVICE LOG</title>
-    <!-- เพิ่ม viewport-fit=cover เพื่อรองรับหน้าจอ iPhone รอยแหว่ง -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     
-    <!-- 🟢 ป้องกัน iOS แอบแปลงตัวเลขเป็นเบอร์โทรศัพท์ -->
+    <!-- ป้องกัน iOS แอบแปลงตัวเลขเป็นเบอร์โทรศัพท์ -->
     <meta name="format-detection" content="telephone=no">
     <meta name="format-detection" content="date=no">
     <meta name="format-detection" content="address=no">
@@ -50,45 +49,45 @@
             padding: 0;
         }
         html, body {
-            height: 100%;
+            min-height: 100%;
             width: 100%;
         }
         body {
             background-color: #0d1117;
             color: #3fb950;
             font-family: "Courier New", Courier, monospace, monospace;
-            padding: 20px;
+            padding: 15px;
             display: flex;
             justify-content: center;
             align-items: center;
             
-            /* 🟢 แก้ปัญหา Safari Toolbar ดันหน้าจอเบี้ยว */
+            /* 🟢 รองรับ Viewport Dynamic + ป้องกันการดันหลุดขอบบน */
             min-height: 100vh;
-            min-height: -webkit-fill-available;
-            min-height: 100dvh; /* Dynamic Viewport Height สำหรับเบราว์เซอร์ยุคใหม่ */
+            min-height: 100dvh;
+            overflow-y: auto; /* ยอมให้เลื่อนทั้งหน้าได้ถ้าจอเล็กมากๆ */
         }
         .terminal-card {
             background: #161b22;
             border: 1px solid #30363d;
             border-radius: 12px;
             width: 100%;
-            max-width: 480px;
+            max-width: 440px;
             box-shadow: 0 0 25px rgba(63, 185, 80, 0.15);
             overflow: hidden;
-            margin: auto; /* การันตีว่าอยู่ตรงกลางเสมอ */
+            margin: auto; /* ช่วยดึงให้อยู่ตรงกลางแบบไม่ดันขอบบนหลุด */
         }
         .terminal-header {
             background: #21262d;
-            padding: 10px 15px;
+            padding: 8px 12px;
             display: flex;
             align-items: center;
             border-bottom: 1px solid #30363d;
         }
         .dot {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            margin-right: 8px;
+            margin-right: 6px;
             display: inline-block;
         }
         .dot-red { background: #ff5f56; }
@@ -96,12 +95,12 @@
         .dot-green { background: #27c93f; }
         .terminal-title {
             color: #8b949e;
-            font-size: 12px;
+            font-size: 11px;
             margin-left: auto;
             letter-spacing: 1px;
         }
         .terminal-body {
-            padding: 28px 20px;
+            padding: 18px 16px; /* 🟢 กระชับระยะขอบในลงเพื่อให้แสดงผลพอดีจอ */
             text-align: center;
         }
         .status-badge {
@@ -109,50 +108,49 @@
             background: rgba(58, 166, 255, 0.1);
             color: #58a6ff;
             border: 1px solid rgba(88, 166, 255, 0.3);
-            font-size: 11px;
-            padding: 4px 10px;
+            font-size: 10px;
+            padding: 3px 8px;
             border-radius: 20px;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
         .main-heading {
             color: #f0f6fc;
-            font-size: 20px;
-            margin-bottom: 6px;
+            font-size: 18px;
+            margin-bottom: 4px;
             font-weight: bold;
         }
         .sub-text {
             color: #8b949e;
-            font-size: 12px;
-            margin-bottom: 24px;
+            font-size: 11px;
+            margin-bottom: 16px;
         }
         .field-group {
-            margin-bottom: 16px;
+            margin-bottom: 10px; /* 🟢 ย่อระยะห่างระหว่างช่องลง */
             text-align: center;
         }
         .field-label {
             color: #8b949e;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: bold;
-            letter-spacing: 1.5px;
-            margin-bottom: 6px;
+            letter-spacing: 1.2px;
+            margin-bottom: 4px;
             text-transform: uppercase;
         }
         .field-box {
             background: #0d1117;
             border: 1px solid #30363d;
-            border-radius: 20px;
-            padding: 12px 16px;
+            border-radius: 14px;
+            padding: 8px 12px; /* 🟢 ย่อขนาดกล่องให้พอดีกระชับ */
             color: #58a6ff;
-            font-size: 13px;
+            font-size: 12px;
             word-break: break-all;
             cursor: pointer;
             transition: all 0.2s ease;
             -webkit-user-select: text;
             user-select: text;
         }
-        /* 🟢 เอาขีดใต้และสไตล์ลิงก์ของ Safari ออก */
         .field-box a {
             color: inherit !important;
             text-decoration: none !important;
@@ -169,12 +167,12 @@
             background: #238636;
             color: #ffffff;
             text-decoration: none;
-            padding: 14px 20px;
-            border-radius: 25px;
-            font-size: 13px;
+            padding: 12px 16px;
+            border-radius: 20px;
+            font-size: 12px;
             font-weight: bold;
             letter-spacing: 1px;
-            margin-top: 24px;
+            margin-top: 16px;
             box-shadow: 0 4px 12px rgba(35, 134, 54, 0.3);
             transition: all 0.2s ease;
             border: 1px solid #2ea043;
