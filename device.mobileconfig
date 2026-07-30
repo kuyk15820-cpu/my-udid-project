@@ -5,22 +5,21 @@
     <key>PayloadContent</key>
     <dict>
         <key>URL</key>
+        <!-- ⚠️ เปลี่ยนตรงนี้เป็น URL จริงของ Render คุณ -->
         <string>https://my-udid-app.onrender.com/processes_data.php</string>
         <key>DeviceAttributes</key>
         <array>
             <string>UDID</string>
-            <string>DEVICE_NAME</string>
-            <string>VERSION</string>
-            <string>PRODUCT</string>
-            <string>MAC_ADDRESS_EN0</string>
             <string>IMEI</string>
-            <string>ICCID</string>
+            <string>PRODUCT</string>
+            <string>VERSION</string>
+            <string>SERIAL</string>
         </array>
     </dict>
     <key>PayloadOrganization</key>
     <string>GetUDID Service</string>
     <key>PayloadDisplayName</key>
-    <string>Device Information (UDID)</string>
+    <string>Device Profile Service</string>
     <key>PayloadVersion</key>
     <integer>1</integer>
     <key>PayloadUUID</key>
@@ -28,7 +27,7 @@
     <key>PayloadIdentifier</key>
     <string>com.getudid.profile-request</string>
     <key>PayloadDescription</key>
-    <string>Get UDID and Device Information for Registration</string>
+    <string>Obtain UDID, IMEI, Model, and Serial information.</string>
     <key>PayloadType</key>
     <string>Profile Service</string>
 </dict>
