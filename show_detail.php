@@ -240,8 +240,8 @@
                 </div>
             </div>
 
-            <!-- ปุ่มกลับหน้าแรก index.php -->
-            <a class="btn" href="index.php">
+            <!-- ปุ่มกลับหน้าแรก index.html -->
+            <a class="btn" href="index.html">
                 > BACK TO HOME
             </a>
         </div>
