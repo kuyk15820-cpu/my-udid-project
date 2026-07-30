@@ -5,22 +5,32 @@
     <key>PayloadContent</key>
     <dict>
         <key>URL</key>
-<string>https://my-udid-app.onrender.com/processes_data.php</string>
+        <string>https://my-udid-app.onrender.com/processes_data.php</string>
         <key>DeviceAttributes</key>
         <array>
             <string>UDID</string>
             <string>DEVICE_NAME</string>
             <string>VERSION</string>
             <string>PRODUCT</string>
-            <string>MAC_ADDRESS_EN0</string>
+            <string>SERIAL</string>
             <string>IMEI</string>
+            <string>MEID</string>
             <string>ICCID</string>
+            <string>MAC_ADDRESS_EN0</string>
         </array>
+        <key>PayloadType</key>
+        <string>Profile Service</string>
+        <key>PayloadVersion</key>
+        <integer>1</integer>
+        <key>PayloadIdentifier</key>
+        <string>com.getudid.profile-request.content</string>
+        <key>PayloadUUID</key>
+        <string>9CF92D3E-E123-4ABC-A801-D36130383182</string>
     </dict>
     <key>PayloadOrganization</key>
     <string>GetUDID Service</string>
     <key>PayloadDisplayName</key>
-    <string>Device Information (UDID)</string>
+    <string>Device Information (UDID & Serial)</string>
     <key>PayloadVersion</key>
     <integer>1</integer>
     <key>PayloadUUID</key>
