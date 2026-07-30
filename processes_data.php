@@ -13,10 +13,9 @@ if (!empty($data)) {
     if ($pos1 !== false && $pos2 !== false) {
         $data2 = substr($data, $pos1, ($pos2 - $pos1) + 8);
 
-        $xml = xml_parser_create();
-        xml_parse_into_struct($xml, $data2, $vs);
-        xml_parser_free($xml);
-
+        // ใช้ SimpleXMLElement พาร์สค่าแทน xml_parse_into_struct เพื่อความแม่นยำของ Unicode / ภาษาไทย
+        $xml = simplexml_load_string($data2);
+        
         $UDID = "";
         $DEVICE_PRODUCT = "";
         $DEVICE_VERSION = "";
@@ -26,46 +25,44 @@ if (!empty($data)) {
         $ICCID = "";
         $MAC_ADDRESS_EN0 = "";
 
-        $arrayCleaned = array();
-        if (is_array($vs)) {
-            foreach ($vs as $v) {
-                if (isset($v['level']) && $v['level'] == 3 && isset($v['type']) && $v['type'] == 'complete') {
-                    $arrayCleaned[] = $v;
+        if ($xml !== false) {
+            // อ่านค่าจาก dict
+            $nodes = $xml->dict->children();
+            $key = null;
+            
+            foreach ($nodes as $node) {
+                if ($node->getName() == 'key') {
+                    $key = (string)$node;
+                } elseif ($node->getName() == 'string' && $key !== null) {
+                    switch ($key) {
+                        case 'UDID':
+                            $UDID = (string)$node;
+                            break;
+                        case 'PRODUCT':
+                            $DEVICE_PRODUCT = (string)$node;
+                            break;
+                        case 'VERSION':
+                            $DEVICE_VERSION = (string)$node;
+                            break;
+                        case 'DEVICE_NAME':
+                            $DEVICE_NAME = (string)$node;
+                            break;
+                        case 'SERIAL':
+                            $SERIAL = (string)$node;
+                            break;
+                        case 'IMEI':
+                            $IMEI = (string)$node;
+                            break;
+                        case 'ICCID':
+                            $ICCID = (string)$node;
+                            break;
+                        case 'MAC_ADDRESS_EN0':
+                            $MAC_ADDRESS_EN0 = (string)$node;
+                            break;
+                    }
+                    $key = null;
                 }
             }
-        }
-
-        $iterator = 0;
-        foreach ($arrayCleaned as $elem) {
-            if (isset($elem['value'])) {
-                switch ($elem['value']) {
-                    case "UDID":
-                        $UDID = isset($arrayCleaned[$iterator + 1]['value']) ? $arrayCleaned[$iterator + 1]['value'] : '';
-                        break;
-                    case "PRODUCT":
-                        $DEVICE_PRODUCT = isset($arrayCleaned[$iterator + 1]['value']) ? $arrayCleaned[$iterator + 1]['value'] : '';
-                        break;
-                    case "VERSION":
-                        $DEVICE_VERSION = isset($arrayCleaned[$iterator + 1]['value']) ? $arrayCleaned[$iterator + 1]['value'] : '';
-                        break;
-                    case "DEVICE_NAME":
-                        $DEVICE_NAME = isset($arrayCleaned[$iterator + 1]['value']) ? $arrayCleaned[$iterator + 1]['value'] : '';
-                        break;
-                    case "SERIAL":
-                        $SERIAL = isset($arrayCleaned[$iterator + 1]['value']) ? $arrayCleaned[$iterator + 1]['value'] : '';
-                        break;
-                    case "IMEI":
-                        $IMEI = isset($arrayCleaned[$iterator + 1]['value']) ? $arrayCleaned[$iterator + 1]['value'] : '';
-                        break;
-                    case "ICCID":
-                        $ICCID = isset($arrayCleaned[$iterator + 1]['value']) ? $arrayCleaned[$iterator + 1]['value'] : '';
-                        break;
-                    case "MAC_ADDRESS_EN0":
-                        $MAC_ADDRESS_EN0 = isset($arrayCleaned[$iterator + 1]['value']) ? $arrayCleaned[$iterator + 1]['value'] : '';
-                        break;
-                }
-            }
-            $iterator++;
         }
 
         $params = "UDID=" . urlencode($UDID) .
