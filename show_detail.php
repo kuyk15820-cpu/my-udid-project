@@ -19,16 +19,6 @@
             $product_version = 'N/A';
         }
     }
-
-    $subject = "This is my UDID from iOS device";
-    $body  = "Hello,\n\nThis is my iOS Device Information:\n";
-    $body .= "UDID: {$udid}\n";
-    $body .= "IMEI: {$imei}\n";
-    $body .= "Product / Version: {$product_version}\n";
-    $body .= "Serial: {$serial}\n";
-
-    $mailto_subject = rawurlencode($subject);
-    $mailto_body    = rawurlencode($body);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -47,6 +37,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            -webkit-tap-highlight-color: transparent; /* เอาไฮไลท์สีฟ้า/ส้มตอนกดบนมือถือออก */
         }
         html, body {
             min-height: 100%;
@@ -61,10 +52,10 @@
             justify-content: center;
             align-items: center;
             
-            /* 🟢 รองรับ Viewport Dynamic + ป้องกันการดันหลุดขอบบน */
+            /* รองรับ Viewport Dynamic + ป้องกันการดันหลุดขอบบน */
             min-height: 100vh;
             min-height: 100dvh;
-            overflow-y: auto; /* ยอมให้เลื่อนทั้งหน้าได้ถ้าจอเล็กมากๆ */
+            overflow-y: auto;
         }
         .terminal-card {
             background: #161b22;
@@ -74,7 +65,7 @@
             max-width: 440px;
             box-shadow: 0 0 25px rgba(63, 185, 80, 0.15);
             overflow: hidden;
-            margin: auto; /* ช่วยดึงให้อยู่ตรงกลางแบบไม่ดันขอบบนหลุด */
+            margin: auto;
         }
         .terminal-header {
             background: #21262d;
@@ -100,7 +91,7 @@
             letter-spacing: 1px;
         }
         .terminal-body {
-            padding: 18px 16px; /* 🟢 กระชับระยะขอบในลงเพื่อให้แสดงผลพอดีจอ */
+            padding: 18px 16px;
             text-align: center;
         }
         .status-badge {
@@ -127,7 +118,7 @@
             margin-bottom: 16px;
         }
         .field-group {
-            margin-bottom: 10px; /* 🟢 ย่อระยะห่างระหว่างช่องลง */
+            margin-bottom: 10px;
             text-align: center;
         }
         .field-label {
@@ -142,24 +133,27 @@
             background: #0d1117;
             border: 1px solid #30363d;
             border-radius: 14px;
-            padding: 8px 12px; /* 🟢 ย่อขนาดกล่องให้พอดีกระชับ */
+            padding: 8px 12px;
             color: #58a6ff;
             font-size: 12px;
             word-break: break-all;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: background 0.2s ease, transform 0.1s ease;
             -webkit-user-select: text;
             user-select: text;
+            outline: none; /* เอาขอบน้ำเงินเวลากดเลือกออก */
         }
         .field-box a {
             color: inherit !important;
             text-decoration: none !important;
             pointer-events: none !important;
         }
-        .field-box:active {
+        /* เอาเปลี่ยนสีขอบ (border-color) ตอนกดออก คงไว้เฉพาะการยุบตัวเบาๆ และเปลี่ยนสีพื้นหลัง */
+        .field-box:active, .field-box:focus {
             transform: scale(0.98);
             background: #1f242c;
-            border-color: #58a6ff;
+            border-color: #30363d; /* คงสีขอบเดิมไว้ */
+            outline: none;
         }
         .btn {
             display: block;
@@ -176,10 +170,12 @@
             box-shadow: 0 4px 12px rgba(35, 134, 54, 0.3);
             transition: all 0.2s ease;
             border: 1px solid #2ea043;
+            outline: none;
         }
-        .btn:active {
+        .btn:active, .btn:focus {
             transform: scale(0.97);
             background: #2ea043;
+            outline: none;
         }
         .toast {
             position: fixed;
@@ -193,6 +189,8 @@
             font-size: 12px;
             display: none;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            white-space: nowrap;
+            z-index: 9999;
         }
     </style>
 </head>
@@ -214,7 +212,7 @@
             <!-- 1. UDID -->
             <div class="field-group">
                 <div class="field-label">UDID</div>
-                <div class="field-box" onclick="copyText('<?php echo $udid; ?>')">
+                <div class="field-box" onclick="copyText('<?php echo $udid; ?>', 'UDID')">
                     <?php echo $udid; ?>
                 </div>
             </div>
@@ -222,7 +220,7 @@
             <!-- 2. IMEI -->
             <div class="field-group">
                 <div class="field-label">IMEI</div>
-                <div class="field-box" onclick="copyText('<?php echo $imei; ?>')">
+                <div class="field-box" onclick="copyText('<?php echo $imei; ?>', 'IMEI')">
                     <?php echo $imei; ?>
                 </div>
             </div>
@@ -230,7 +228,7 @@
             <!-- 3. PRODUCT / VERSION -->
             <div class="field-group">
                 <div class="field-label">PRODUCT / VERSION</div>
-                <div class="field-box" onclick="copyText('<?php echo $product_version; ?>')">
+                <div class="field-box" onclick="copyText('<?php echo $product_version; ?>', 'PRODUCT / VERSION')">
                     <?php echo $product_version; ?>
                 </div>
             </div>
@@ -238,13 +236,14 @@
             <!-- 4. SERIAL -->
             <div class="field-group">
                 <div class="field-label">SERIAL</div>
-                <div class="field-box" onclick="copyText('<?php echo $serial; ?>')">
+                <div class="field-box" onclick="copyText('<?php echo $serial; ?>', 'SERIAL')">
                     <?php echo $serial; ?>
                 </div>
             </div>
 
-            <a class="btn" href="mailto:?subject=<?php echo $mailto_subject ?>&body=<?php echo $mailto_body ?>">
-                > SEND VIA EMAIL
+            <!-- ปุ่มกลับหน้าแรก index.php -->
+            <a class="btn" href="index.php">
+                > BACK TO HOME
             </a>
         </div>
     </div>
@@ -252,14 +251,18 @@
     <div id="toast" class="toast">Copied to clipboard!</div>
 
     <script>
-        function copyText(text) {
+        let toastTimeout;
+        function copyText(text, label) {
             if (text === 'N/A' || text === '') return;
             navigator.clipboard.writeText(text).then(() => {
                 const toast = document.getElementById('toast');
+                toast.innerText = `Copied ${label} to clipboard!`;
                 toast.style.display = 'block';
-                setTimeout(() => {
+                
+                clearTimeout(toastTimeout);
+                toastTimeout = setTimeout(() => {
                     toast.style.display = 'none';
-                }, 1500);
+                }, 1800);
             });
         }
     </script>
