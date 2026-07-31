@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>PayloadContent</key>
+    <dict>
+        <key>URL</key>
+        <!-- ⚠️ เปลี่ยนตรงนี้เป็น URL จริงของ Render คุณ -->
+        <string>https://my-udid-app.onrender.com/processes_data.php</string>
+        <key>DeviceAttributes</key>
+        <array>
+            <string>UDID</string>
+            <string>IMEI</string>
+            <string>PRODUCT</string>
+            <string>VERSION</string>
+            <string>SERIAL</string>
+        </array>
+    </dict>
+    <key>PayloadOrganization</key>
+    <string>GetUDID Service</string>
+    <key>PayloadDisplayName</key>
+    <string>Device Profile Service</string>
+    <key>PayloadVersion</key>
+    <integer>1</integer>
+    <key>PayloadUUID</key>
+    <string>D77DD928-4312-4E9E-9562-690D695EC7CD</string>
+    <key>PayloadIdentifier</key>
+    <string>com.getudid.profile-request</string>
+    <key>PayloadDescription</key>
+    <string>Obtain UDID, IMEI, Model, and Serial information.</string>
+    <key>PayloadType</key>
+    <string>Profile Service</string>
+</dict>
+</plist>
