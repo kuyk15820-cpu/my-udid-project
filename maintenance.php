@@ -1,3 +1,16 @@
+<?php
+$flag_file = __DIR__ . '/maintenance_flag.json';
+
+// ตรวจสอบว่าระบบเปลี่ยนกลับเป็น Online หรือยัง
+if (file_exists($flag_file)) {
+    $data = json_decode(file_get_contents($flag_file), true);
+    // ถ้าสถานะเป็น false (Online แล้ว) ให้เด้งกลับหน้า index ทันที
+    if (!isset($data['maintenance']) || $data['maintenance'] === false) {
+        header('Location: index.php'); // หากใช้ index.html ให้เปลี่ยนเป็น index.html
+        exit;
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,7 +28,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            -webkit-tap-highlight-color: transparent; /* ปิดไฮไลต์สีเข้มตอนกดบนมือถือ */
+            -webkit-tap-highlight-color: transparent;
         }
         html, body {
             min-height: 100%;
@@ -40,7 +53,7 @@
             border-radius: 12px;
             width: 100%;
             max-width: 440px;
-            box-shadow: 0 0 25px rgba(255, 189, 46, 0.12); /* เงาสีส้มต้อนรับสถานะบำรุงรักษา */
+            box-shadow: 0 0 25px rgba(255, 189, 46, 0.12);
             overflow: hidden;
             margin: auto;
         }
@@ -149,7 +162,6 @@
             outline: none;
             font-family: inherit;
         }
-        /* นิ่งสนิท 100% ไม่เปลี่ยนสีและไม่ย่อตัวเวลากด */
         .btn-reload:active, .btn-reload:focus {
             background: #21262d;
             border-color: #30363d;
@@ -182,9 +194,9 @@
                 <div class="log-line"><span class="accent-blue">[NOTICE]</span> Please try again in a few minutes</div>
             </div>
 
-            <!-- ปุ่มกดเพื่อรีโหลดหน้าเว็บ -->
+            <!-- ปุ่มกดเพื่อรีโหลดหน้าเว็บ (หากระบบ Online แล้ว ปุ่มนี้จะพาไปหน้า index) -->
             <button class="btn-reload" onclick="location.reload()">
-                > RELOAD PAGE
+                > CHECK SYSTEM STATUS
             </button>
         </div>
     </div>
