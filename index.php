@@ -1,8 +1,9 @@
+<?php require_once 'check_status.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <title>TERMINAL // GET UDID</title>
+        <title>Get UDID</title>
         <!-- 🟢 เพิ่ม viewport-fit=cover รองรับจอมือถือที่มีรอยแหว่ง -->
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
         
@@ -177,7 +178,7 @@
                     <div class="log-line"><span class="highlight">[INFO]</span> System will collect UDID & Device Log</div>
                 </div>
 
-                <a class="btn" href="get_mobileconfig.php">> GET MOBILECONFIG</a>
+                <a class="btn" href="get_mobileconfig.php">> GET PROFILE</a>
             </div>
         </div>
 
