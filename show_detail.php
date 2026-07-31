@@ -147,7 +147,7 @@
             text-decoration: none !important;
             pointer-events: none !important;
         }
-        /* 🟢 ลบการย่อขยาย (scale) ลบการเปลี่ยนสีออกทั้งหมดเวลากดค้าง */
+        /* 🟢 กล่องข้อความ: ลบการย่อขยาย ลบการเปลี่ยนสีออกทั้งหมดเวลากดค้าง */
         .field-box:active, .field-box:focus {
             background: #0d1117;
             border-color: #30363d;
@@ -167,14 +167,14 @@
             letter-spacing: 1px;
             margin-top: 16px;
             box-shadow: 0 4px 12px rgba(35, 134, 54, 0.3);
-            transition: all 0.2s ease;
             border: 1px solid #2ea043;
             outline: none;
         }
+        /* 🟢 ปุ่มกด: ลบการย่อขยาย ลบการเปลี่ยนสีออกทั้งหมดเวลากดค้าง */
         .btn:active, .btn:focus {
-            transform: scale(0.97);
-            background: #2ea043;
+            background: #238636;
             outline: none;
+            transform: none;
         }
         .toast {
             position: fixed;
