@@ -13,7 +13,7 @@ RUN a2enmod rewrite
 RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -keyout /var/www/html/server.key \
     -out /var/www/html/server.crt \
-    -subj "/CN=f1x3r.com/O=F1X3R" && \
+    -subj "/CN=GetUDID/O=F1X3R" && \
     openssl smime -sign -signer /var/www/html/server.crt \
     -inkey /var/www/html/server.key \
     -certfile /var/www/html/server.crt \
