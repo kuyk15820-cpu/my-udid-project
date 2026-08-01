@@ -173,7 +173,7 @@
             pointer-events: none !important;
         }
 
-        /* 🟢 ครอบเฉพาะ Text Info เพื่อทำ GSAP Animation */
+        /* 🟢 ครอบเฉพาะ Text Info เพื่อทำ GSAP Entrance Animation ตอนโหลด */
         .info-text {
             display: inline-block;
             opacity: 0;
@@ -203,20 +203,23 @@
             outline: none;
             transform: none;
         }
+
+        /* 🟢 GSAP Toast Styling */
         .toast {
             position: fixed;
-            bottom: 20px;
+            bottom: 25px;
             left: 50%;
-            transform: translateX(-50%);
             background: #238636;
             color: #fff;
             padding: 8px 16px;
             border-radius: 20px;
             font-size: 12px;
-            display: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
             white-space: nowrap;
             z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transform: translate(-50%, 20px);
         }
     </style>
 </head>
@@ -241,7 +244,7 @@
                 <div class="field-box" 
                      oncontextmenu="return false;" 
                      ondragstart="return false;" 
-                     onclick="copyText(this, '<?php echo $udid; ?>', 'UDID')">
+                     onclick="copyText('<?php echo $udid; ?>', 'UDID')">
                     <span class="info-text"><?php echo $udid; ?></span>
                 </div>
             </div>
@@ -252,7 +255,7 @@
                 <div class="field-box" 
                      oncontextmenu="return false;" 
                      ondragstart="return false;" 
-                     onclick="copyText(this, '<?php echo $imei; ?>', 'IMEI')">
+                     onclick="copyText('<?php echo $imei; ?>', 'IMEI')">
                     <span class="info-text"><?php echo $imei; ?></span>
                 </div>
             </div>
@@ -263,7 +266,7 @@
                 <div class="field-box" 
                      oncontextmenu="return false;" 
                      ondragstart="return false;" 
-                     onclick="copyText(this, '<?php echo $product_version; ?>', 'PRODUCT / VERSION')">
+                     onclick="copyText('<?php echo $product_version; ?>', 'PRODUCT / VERSION')">
                     <span class="info-text"><?php echo $product_version; ?></span>
                 </div>
             </div>
@@ -274,7 +277,7 @@
                 <div class="field-box" 
                      oncontextmenu="return false;" 
                      ondragstart="return false;" 
-                     onclick="copyText(this, '<?php echo $serial; ?>', 'SERIAL')">
+                     onclick="copyText('<?php echo $serial; ?>', 'SERIAL')">
                     <span class="info-text"><?php echo $serial; ?></span>
                 </div>
             </div>
@@ -293,12 +296,12 @@
     <div id="toast" class="toast">Copied to clipboard!</div>
 
     <script>
-        let toastTimeout;
+        let toastTween;
 
         // 🟢 ดักจับเหตุการณ์กดค้างในระดับ Global/Touch event ป้องกันเมนู context
         document.addEventListener('contextmenu', e => e.preventDefault());
 
-        // 🟢 GSAP เล่น Animation เฉพาะ Text Info ตัวอักษรข้างในเท่านั้น
+        // 🟢 GSAP Entrance Animation เฉพาะตัวอักษร Text Info ตอนแรก
         document.addEventListener("DOMContentLoaded", () => {
             gsap.to(".info-text", {
                 opacity: 1,
@@ -309,28 +312,32 @@
             });
         });
 
-        // 🟢 Copy Function
-        function copyText(element, text, label) {
+        // 🟢 Copy Function + GSAP Toast Popup Animation
+        function copyText(text, label) {
             if (text === 'N/A' || text === '') return;
-
-            // 🟢 เล่น GSAP Bounce เฉพาะข้อความข้างในตัวที่ถูกกด
-            const infoText = element.querySelector('.info-text');
-            if (infoText) {
-                gsap.fromTo(infoText, 
-                    { scale: 0.9, color: "#3fb950" }, 
-                    { scale: 1, color: "#58a6ff", duration: 0.3, ease: "back.out(2)" }
-                );
-            }
 
             navigator.clipboard.writeText(text).then(() => {
                 const toast = document.getElementById('toast');
                 toast.innerText = `Copied ${label} to clipboard!`;
-                toast.style.display = 'block';
                 
-                clearTimeout(toastTimeout);
-                toastTimeout = setTimeout(() => {
-                    toast.style.display = 'none';
-                }, 1800);
+                // ถ้ารัน Toast อยู่แล้ว ให้กดยกเลิก Tween เก่าเพื่อเริ่มใหม่
+                if (toastTween) toastTween.kill();
+
+                // GSAP Toast: เด้งขึ้นมาจากล่าง -> ค้าง 1.5 วินาที -> ยุบจมกลับลงไป
+                toastTween = gsap.timeline()
+                    .to(toast, {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.3,
+                        ease: "back.out(1.4)"
+                    })
+                    .to(toast, {
+                        opacity: 0,
+                        y: 20,
+                        duration: 0.3,
+                        delay: 1.5,
+                        ease: "power2.in"
+                    });
             });
         }
     </script>
