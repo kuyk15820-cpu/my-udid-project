@@ -51,16 +51,11 @@ if (!empty($data)) {
             }
         }
 
-        // รวมรหัสโมเดลตรงๆ (เช่น iPhone10,3) เข้ากับ Version (เช่น 20D67)
-        $product_version = $DEVICE_PRODUCT;
-        if (!empty($DEVICE_VERSION)) {
-            $product_version .= " / " . $DEVICE_VERSION;
-        }
-
-        // ส่ง Parameter ต่อไปที่หน้า udid-info.php
+        // 🟢 แก้ไข: ส่งแบบแยกค่าเพื่อให้หน้า udid-info.php นำไปแปลงเป็นชื่อไอโฟนจริงได้
         $params = "UDID=" . urlencode($UDID) .
                   "&IMEI=" . urlencode($IMEI) .
-                  "&PRODUCT_VERSION=" . urlencode($product_version) .
+                  "&DEVICE_PRODUCT=" . urlencode($DEVICE_PRODUCT) .
+                  "&DEVICE_VERSION=" . urlencode($DEVICE_VERSION) .
                   "&SERIAL=" . urlencode($SERIAL);
 
         header("Location: udid-info.php?" . $params, true, 301);
