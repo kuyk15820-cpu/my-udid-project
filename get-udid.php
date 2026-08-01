@@ -51,12 +51,12 @@ if (!empty($data)) {
             }
         }
 
-        // 🟢 แก้ไข: ส่งแบบแยกค่าเพื่อให้หน้า udid-info.php นำไปแปลงเป็นชื่อไอโฟนจริงได้
-        $params = "UDID=" . urlencode($UDID) .
-                  "&IMEI=" . urlencode($IMEI) .
-                  "&DEVICE_PRODUCT=" . urlencode($DEVICE_PRODUCT) .
-                  "&DEVICE_VERSION=" . urlencode($DEVICE_VERSION) .
-                  "&SERIAL=" . urlencode($SERIAL);
+        // ส่ง DEVICE_PRODUCT และ DEVICE_VERSION แยกกัน เพื่อให้ udid-info.php นำไปแปลงเป็น iPhone X ได้
+$params = "UDID=" . urlencode($UDID) .
+          "&IMEI=" . urlencode($IMEI) .
+          "&DEVICE_PRODUCT=" . urlencode($DEVICE_PRODUCT) .
+          "&DEVICE_VERSION=" . urlencode($DEVICE_VERSION) .
+          "&SERIAL=" . urlencode($SERIAL);
 
         header("Location: udid-info.php?" . $params, true, 301);
         exit();
