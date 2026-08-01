@@ -1,10 +1,24 @@
 <?php 
+    // 🟢 โหลดไลบรารี Device Detector เพื่อแปลง Model Identifier
+    if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+        require_once __DIR__ . '/vendor/autoload.php';
+    }
+
     $udid    = isset($_GET['UDID']) && $_GET['UDID'] !== '' ? htmlspecialchars($_GET['UDID']) : 'N/A';
     $imei    = isset($_GET['IMEI']) && $_GET['IMEI'] !== '' ? htmlspecialchars($_GET['IMEI']) : 'N/A';
     $serial  = isset($_GET['SERIAL']) && $_GET['SERIAL'] !== '' ? htmlspecialchars($_GET['SERIAL']) : 'N/A';
 
     // ดึงค่า Product และ Version มาเชื่อมกันในช่องเดียว
-    $product = isset($_GET['DEVICE_PRODUCT']) ? htmlspecialchars($_GET['DEVICE_PRODUCT']) : '';
+    $product_raw = isset($_GET['DEVICE_PRODUCT']) ? htmlspecialchars($_GET['DEVICE_PRODUCT']) : '';
+    
+    // แปลงรหัส Product (เช่น iPhone10,3) เป็นชื่อการตลาด (เช่น iPhone X) ผ่าน Matomo Device Detector
+    if (!empty($product_raw) && class_exists('DeviceDetector\Parser\Device\AbstractDeviceParser')) {
+        $translated_name = \DeviceDetector\Parser\Device\AbstractDeviceParser::getFullName($product_raw);
+        $product = !empty($translated_name) ? $translated_name : $product_raw;
+    } else {
+        $product = $product_raw;
+    }
+
     $version = isset($_GET['DEVICE_VERSION']) ? htmlspecialchars($_GET['DEVICE_VERSION']) : '';
 
     // ถ้ามีการส่งค่า PRODUCT_VERSION แบบรวมมาจาก get-udid.php แล้ว ให้ใช้ค่านั้นได้เลย
