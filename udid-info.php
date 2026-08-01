@@ -12,8 +12,32 @@
     $product_raw = isset($_GET['DEVICE_PRODUCT']) ? htmlspecialchars($_GET['DEVICE_PRODUCT']) : '';
     
     // แปลงรหัส Product (เช่น iPhone10,3) เป็นชื่อการตลาด (เช่น iPhone X) ผ่าน Matomo Device Detector
-    if (!empty($product_raw) && class_exists('DeviceDetector\Parser\Device\AbstractDeviceParser')) {
-        $translated_name = \DeviceDetector\Parser\Device\AbstractDeviceParser::getFullName($product_raw);
+    if (!empty($product_raw) && class_exists('DeviceDetector\Parser\Device\DeviceParserAbstract')) {
+        $translated_name = null;
+        
+        // อ่านตารางข้อมูลอุปกรณ์ Apple (yml) ของไลบรารีโดยตรง
+        $deviceParser = new class extends \DeviceDetector\Parser\Device\DeviceParserAbstract {
+            public static function getModelName($model) {
+                $file = __DIR__ . '/vendor/matomo/device-detector/regexes/device/apple.yml';
+                if (file_exists($file)) {
+                    $yml = file_get_contents($file);
+                    if (preg_match('/model:\s*[\'"]?' . preg_quote($model, '/') . '[\'"]?\s*\n\s*device:\s*[^\n]+\n\s*brand:\s*[^\n]+\n\s*name:\s*[\'"]?([^\n\'"]+)[\'"]?/', $yml, $matches)) {
+                        return trim($matches[1]);
+                    }
+                }
+                return null;
+            }
+        };
+
+        // ลองเรียกใช้การค้นหารหัสโมเดล
+        if (class_exists('DeviceDetector\Parser\Device\AbstractDeviceParser')) {
+            $translated_name = \DeviceDetector\Parser\Device\AbstractDeviceParser::getFullName($product_raw);
+        }
+        
+        if (empty($translated_name)) {
+            $translated_name = $deviceParser::getModelName($product_raw);
+        }
+
         $product = !empty($translated_name) ? $translated_name : $product_raw;
     } else {
         $product = $product_raw;
