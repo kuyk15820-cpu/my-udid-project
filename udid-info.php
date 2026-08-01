@@ -83,8 +83,6 @@
             box-shadow: 0 0 25px rgba(63, 185, 80, 0.15);
             overflow: hidden;
             margin: auto;
-            opacity: 0; /* 🟢 ซ่อนไว้ก่อนทำ GSAP Entrance */
-            transform: scale(0.95);
         }
         .terminal-header {
             background: #21262d;
@@ -124,26 +122,21 @@
             margin-bottom: 8px;
             text-transform: uppercase;
             letter-spacing: 1px;
-            opacity: 0;
         }
         .main-heading {
             color: #f0f6fc;
             font-size: 18px;
             margin-bottom: 4px;
             font-weight: bold;
-            opacity: 0;
         }
         .sub-text {
             color: #8b949e;
             font-size: 11px;
             margin-bottom: 16px;
-            opacity: 0;
         }
         .field-group {
             margin-bottom: 10px;
             text-align: center;
-            opacity: 0;
-            transform: translateY(15px);
         }
         .field-label {
             color: #8b949e;
@@ -165,7 +158,6 @@
             word-break: break-all;
             cursor: pointer;
             outline: none;
-            transition: border-color 0.2s;
 
             /* 🟢 ป้องกันการคลุมข้อความเฉพาะจุด */
             -webkit-touch-callout: none !important;
@@ -180,12 +172,14 @@
             text-decoration: none !important;
             pointer-events: none !important;
         }
-        .field-box:active, .field-box:focus {
-            background: #0d1117;
-            border-color: #30363d;
-            outline: none;
-            transform: none;
+
+        /* 🟢 ครอบเฉพาะ Text Info เพื่อทำ GSAP Animation */
+        .info-text {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(8px);
         }
+
         .btn {
             display: block;
             width: 100%;
@@ -203,8 +197,6 @@
             outline: none;
             cursor: pointer;
             font-family: inherit;
-            opacity: 0;
-            transform: translateY(15px);
         }
         .btn:active, .btn:focus {
             background: #238636;
@@ -213,25 +205,24 @@
         }
         .toast {
             position: fixed;
-            bottom: 25px;
+            bottom: 20px;
             left: 50%;
+            transform: translateX(-50%);
             background: #238636;
             color: #fff;
             padding: 8px 16px;
             border-radius: 20px;
             font-size: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             white-space: nowrap;
             z-index: 9999;
-            opacity: 0;
-            pointer-events: none;
-            transform: translate(-50%, 20px);
         }
     </style>
 </head>
 <body>
 
-    <div class="terminal-card" id="terminalCard">
+    <div class="terminal-card">
         <div class="terminal-header">
             <span class="dot dot-red"></span>
             <span class="dot dot-yellow"></span>
@@ -240,9 +231,9 @@
         </div>
 
         <div class="terminal-body">
-            <div><span class="status-badge" id="statusBadge">COLLECTED DATA</span></div>
-            <h1 class="main-heading" id="mainHeading">iOS Device Details</h1>
-            <p class="sub-text" id="subText">Tap any field to copy to clipboard</p>
+            <div><span class="status-badge">COLLECTED DATA</span></div>
+            <h1 class="main-heading">iOS Device Details</h1>
+            <p class="sub-text">Tap any field to copy to clipboard</p>
 
             <!-- 1. UDID -->
             <div class="field-group">
@@ -251,7 +242,7 @@
                      oncontextmenu="return false;" 
                      ondragstart="return false;" 
                      onclick="copyText(this, '<?php echo $udid; ?>', 'UDID')">
-                    <?php echo $udid; ?>
+                    <span class="info-text"><?php echo $udid; ?></span>
                 </div>
             </div>
 
@@ -262,7 +253,7 @@
                      oncontextmenu="return false;" 
                      ondragstart="return false;" 
                      onclick="copyText(this, '<?php echo $imei; ?>', 'IMEI')">
-                    <?php echo $imei; ?>
+                    <span class="info-text"><?php echo $imei; ?></span>
                 </div>
             </div>
 
@@ -273,7 +264,7 @@
                      oncontextmenu="return false;" 
                      ondragstart="return false;" 
                      onclick="copyText(this, '<?php echo $product_version; ?>', 'PRODUCT / VERSION')">
-                    <?php echo $product_version; ?>
+                    <span class="info-text"><?php echo $product_version; ?></span>
                 </div>
             </div>
 
@@ -284,13 +275,12 @@
                      oncontextmenu="return false;" 
                      ondragstart="return false;" 
                      onclick="copyText(this, '<?php echo $serial; ?>', 'SERIAL')">
-                    <?php echo $serial; ?>
+                    <span class="info-text"><?php echo $serial; ?></span>
                 </div>
             </div>
 
             <!-- ปุ่มกลับหน้าแรก index.html -->
             <button type="button" 
-                    id="btnHome"
                     class="btn" 
                     oncontextmenu="return false;" 
                     ondragstart="return false;" 
@@ -303,73 +293,44 @@
     <div id="toast" class="toast">Copied to clipboard!</div>
 
     <script>
-        let toastTween;
+        let toastTimeout;
 
         // 🟢 ดักจับเหตุการณ์กดค้างในระดับ Global/Touch event ป้องกันเมนู context
         document.addEventListener('contextmenu', e => e.preventDefault());
 
-        // 🟢 GSAP Initial Entrance Sequence
+        // 🟢 GSAP เล่น Animation เฉพาะ Text Info ตัวอักษรข้างในเท่านั้น
         document.addEventListener("DOMContentLoaded", () => {
-            const tl = gsap.timeline();
-
-            tl.to("#terminalCard", {
-                opacity: 1,
-                scale: 1,
-                duration: 0.5,
-                ease: "power2.out"
-            })
-            .to(["#statusBadge", "#mainHeading", "#subText"], {
-                opacity: 1,
-                y: 0,
-                duration: 0.3,
-                stagger: 0.08,
-                ease: "power1.out"
-            }, "-=0.2")
-            .to(".field-group", {
+            gsap.to(".info-text", {
                 opacity: 1,
                 y: 0,
                 duration: 0.4,
                 stagger: 0.1,
                 ease: "power2.out"
-            }, "-=0.1")
-            .to("#btnHome", {
-                opacity: 1,
-                y: 0,
-                duration: 0.4,
-                ease: "back.out(1.5)"
-            }, "-=0.1");
+            });
         });
 
-        // 🟢 Copy Function พร้อม GSAP Toast & Micro Animation
+        // 🟢 Copy Function
         function copyText(element, text, label) {
             if (text === 'N/A' || text === '') return;
 
-            // เอฟเฟกต์ย่อกรอบเบาๆ เมื่อกดคลิกคัดลอก
-            gsap.fromTo(element, 
-                { scale: 0.97, borderColor: "#3fb950" }, 
-                { scale: 1, borderColor: "#30363d", duration: 0.25, ease: "power2.out" }
-            );
+            // 🟢 เล่น GSAP Bounce เฉพาะข้อความข้างในตัวที่ถูกกด
+            const infoText = element.querySelector('.info-text');
+            if (infoText) {
+                gsap.fromTo(infoText, 
+                    { scale: 0.9, color: "#3fb950" }, 
+                    { scale: 1, color: "#58a6ff", duration: 0.3, ease: "back.out(2)" }
+                );
+            }
 
             navigator.clipboard.writeText(text).then(() => {
                 const toast = document.getElementById('toast');
                 toast.innerText = `Copied ${label} to clipboard!`;
+                toast.style.display = 'block';
                 
-                if (toastTween) toastTween.kill();
-
-                toastTween = gsap.timeline()
-                    .to(toast, {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.3,
-                        ease: "back.out(1.4)"
-                    })
-                    .to(toast, {
-                        opacity: 0,
-                        y: 20,
-                        duration: 0.3,
-                        delay: 1.5,
-                        ease: "power2.in"
-                    });
+                clearTimeout(toastTimeout);
+                toastTimeout = setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 1800);
             });
         }
     </script>
