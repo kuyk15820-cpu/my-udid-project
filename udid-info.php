@@ -1,51 +1,137 @@
 <?php 
-    // 🟢 โหลดไลบรารี Device Detector เพื่อแปลง Model Identifier
-    if (file_exists(__DIR__ . '/vendor/autoload.php')) {
-        require_once __DIR__ . '/vendor/autoload.php';
-    }
-
     $udid    = isset($_GET['UDID']) && $_GET['UDID'] !== '' ? htmlspecialchars($_GET['UDID']) : 'N/A';
     $imei    = isset($_GET['IMEI']) && $_GET['IMEI'] !== '' ? htmlspecialchars($_GET['IMEI']) : 'N/A';
     $serial  = isset($_GET['SERIAL']) && $_GET['SERIAL'] !== '' ? htmlspecialchars($_GET['SERIAL']) : 'N/A';
 
-    // ดึงค่า Product และ Version มาเชื่อมกันในช่องเดียว
+    // ดึงค่า Product และ Version มาเชื่อมกัน
     $product_raw = isset($_GET['DEVICE_PRODUCT']) ? htmlspecialchars($_GET['DEVICE_PRODUCT']) : '';
     
-    // แปลงรหัส Product (เช่น iPhone10,3) เป็นชื่อการตลาด (เช่น iPhone X) ผ่าน Matomo Device Detector
-    if (!empty($product_raw) && class_exists('DeviceDetector\Parser\Device\DeviceParserAbstract')) {
-        $translated_name = null;
-        
-        // อ่านตารางข้อมูลอุปกรณ์ Apple (yml) ของไลบรารีโดยตรง
-        $deviceParser = new class extends \DeviceDetector\Parser\Device\DeviceParserAbstract {
-            public static function getModelName($model) {
-                $file = __DIR__ . '/vendor/matomo/device-detector/regexes/device/apple.yml';
-                if (file_exists($file)) {
-                    $yml = file_get_contents($file);
-                    if (preg_match('/model:\s*[\'"]?' . preg_quote($model, '/') . '[\'"]?\s*\n\s*device:\s*[^\n]+\n\s*brand:\s*[^\n]+\n\s*name:\s*[\'"]?([^\n\'"]+)[\'"]?/', $yml, $matches)) {
-                        return trim($matches[1]);
-                    }
-                }
-                return null;
-            }
-        };
+    // แปลงรหัส Product Identifier เป็นชื่อการตลาดตาม List ล่าสุด
+    if (!empty($product_raw)) {
+        $apple_models = [
+            // ==========================================
+            // 📱 iPhone Series
+            // ==========================================
+            'iPhone1,1' => 'iPhone',
+            'iPhone1,2' => 'iPhone 3G',
+            'iPhone2,1' => 'iPhone 3GS',
+            'iPhone3,1' => 'iPhone 4', 'iPhone3,2' => 'iPhone 4', 'iPhone3,3' => 'iPhone 4',
+            'iPhone4,1' => 'iPhone 4S', 'iPhone4,2' => 'iPhone 4S', 'iPhone4,3' => 'iPhone 4S',
+            'iPhone5,1' => 'iPhone 5', 'iPhone5,2' => 'iPhone 5',
+            'iPhone5,3' => 'iPhone 5C', 'iPhone5,4' => 'iPhone 5C',
+            'iPhone6,1' => 'iPhone 5S', 'iPhone6,2' => 'iPhone 5S',
+            'iPhone7,2' => 'iPhone 6',
+            'iPhone7,1' => 'iPhone 6 Plus',
+            'iPhone8,1' => 'iPhone 6S',
+            'iPhone8,2' => 'iPhone 6S Plus',
+            'iPhone8,4' => 'iPhone SE',
+            'iPhone9,1' => 'iPhone 7', 'iPhone9,3' => 'iPhone 7',
+            'iPhone9,2' => 'iPhone 7 Plus', 'iPhone9,4' => 'iPhone 7 Plus',
+            'iPhone10,1' => 'iPhone 8', 'iPhone10,4' => 'iPhone 8',
+            'iPhone10,2' => 'iPhone 8 Plus', 'iPhone10,5' => 'iPhone 8 Plus',
+            'iPhone10,3' => 'iPhone X', 'iPhone10,6' => 'iPhone X',
+            'iPhone11,2' => 'iPhone XS',
+            'iPhone11,4' => 'iPhone XS Max', 'iPhone11,6' => 'iPhone XS Max',
+            'iPhone11,8' => 'iPhone XR',
+            'iPhone12,1' => 'iPhone 11',
+            'iPhone12,3' => 'iPhone 11 Pro',
+            'iPhone12,5' => 'iPhone 11 Pro Max',
+            'iPhone12,8' => 'iPhone SE 2',
+            'iPhone13,1' => 'iPhone 12 mini',
+            'iPhone13,2' => 'iPhone 12',
+            'iPhone13,3' => 'iPhone 12 Pro',
+            'iPhone13,4' => 'iPhone 12 Pro Max',
+            'iPhone14,4' => 'iPhone 13 mini',
+            'iPhone14,5' => 'iPhone 13',
+            'iPhone14,2' => 'iPhone 13 Pro',
+            'iPhone14,3' => 'iPhone 13 Pro Max',
+            'iPhone14,6' => 'iPhone SE 3',
+            'iPhone14,7' => 'iPhone 14',
+            'iPhone14,8' => 'iPhone 14 Plus',
+            'iPhone15,2' => 'iPhone 14 Pro',
+            'iPhone15,3' => 'iPhone 14 Pro Max',
+            'iPhone15,4' => 'iPhone 15',
+            'iPhone15,5' => 'iPhone 15 Plus',
+            'iPhone16,1' => 'iPhone 15 Pro',
+            'iPhone16,2' => 'iPhone 15 Pro Max',
+            'iPhone17,3' => 'iPhone 16',
+            'iPhone17,4' => 'iPhone 16 Plus',
+            'iPhone17,1' => 'iPhone 16 Pro',
+            'iPhone17,2' => 'iPhone 16 Pro Max',
+            'iPhone17,5' => 'iPhone 16e',
+            'iPhone18,1' => 'iPhone 17 Pro',
+            'iPhone18,2' => 'iPhone 17 Pro Max',
+            'iPhone18,3' => 'iPhone 17',
+            'iPhone18,4' => 'iPhone Air',
 
-        // ลองเรียกใช้การค้นหารหัสโมเดล
-        if (class_exists('DeviceDetector\Parser\Device\AbstractDeviceParser')) {
-            $translated_name = \DeviceDetector\Parser\Device\AbstractDeviceParser::getFullName($product_raw);
-        }
-        
-        if (empty($translated_name)) {
-            $translated_name = $deviceParser::getModelName($product_raw);
-        }
+            // ==========================================
+            // 📖 iPad Base Models
+            // ==========================================
+            'iPad1,1' => 'iPad',
+            'iPad2,1' => 'iPad 2', 'iPad2,2' => 'iPad 2', 'iPad2,3' => 'iPad 2', 'iPad2,4' => 'iPad 2',
+            'iPad3,1' => 'iPad 3', 'iPad3,2' => 'iPad 3', 'iPad3,3' => 'iPad 3',
+            'iPad3,4' => 'iPad 4', 'iPad3,5' => 'iPad 4', 'iPad3,6' => 'iPad 4',
+            'iPad6,11' => 'iPad 5', 'iPad6,12' => 'iPad 5',
+            'iPad7,5' => 'iPad 6', 'iPad7,6' => 'iPad 6',
+            'iPad7,11' => 'iPad 7', 'iPad7,12' => 'iPad 7',
+            'iPad11,6' => 'iPad 8', 'iPad11,7' => 'iPad 8',
+            'iPad12,1' => 'iPad 9', 'iPad12,2' => 'iPad 9',
+            'iPad13,18' => 'iPad 10', 'iPad13,19' => 'iPad 10',
+            'iPad15,7' => 'iPad (A16)', 'iPad15,8' => 'iPad (A16)',
 
-        $product = !empty($translated_name) ? $translated_name : $product_raw;
+            // ==========================================
+            // 🪶 iPad Air Series
+            // ==========================================
+            'iPad4,1' => 'iPad Air', 'iPad4,2' => 'iPad Air', 'iPad4,3' => 'iPad Air',
+            'iPad5,3' => 'iPad Air 2', 'iPad5,4' => 'iPad Air 2',
+            'iPad11,3' => 'iPad Air 3', 'iPad11,4' => 'iPad Air 3',
+            'iPad13,1' => 'iPad Air 4', 'iPad13,2' => 'iPad Air 4',
+            'iPad13,16' => 'iPad Air 5', 'iPad13,17' => 'iPad Air 5',
+            'iPad14,8' => 'iPad Air 11-inch (M2)', 'iPad14,9' => 'iPad Air 11-inch (M2)',
+            'iPad15,3' => 'iPad Air 11-inch (M3)', 'iPad15,4' => 'iPad Air 11-inch (M3)',
+            'iPad14,10' => 'iPad Air 13-inch (M2)', 'iPad14,11' => 'iPad Air 13-inch (M2)',
+            'iPad15,5' => 'iPad Air 13-inch (M3)', 'iPad15,6' => 'iPad Air 13-inch (M3)',
+
+            // ==========================================
+            // ✏️ iPad Mini Series
+            // ==========================================
+            'iPad2,5' => 'iPad Mini', 'iPad2,6' => 'iPad Mini', 'iPad2,7' => 'iPad Mini',
+            'iPad4,4' => 'iPad Mini 2', 'iPad4,5' => 'iPad Mini 2', 'iPad4,6' => 'iPad Mini 2',
+            'iPad4,7' => 'iPad Mini 3', 'iPad4,8' => 'iPad Mini 3', 'iPad4,9' => 'iPad Mini 3',
+            'iPad5,1' => 'iPad Mini 4', 'iPad5,2' => 'iPad Mini 4',
+            'iPad11,1' => 'iPad Mini 5', 'iPad11,2' => 'iPad Mini 5',
+            'iPad14,1' => 'iPad Mini 6', 'iPad14,2' => 'iPad Mini 6',
+            'iPad16,1' => 'iPad Mini (A17 Pro)', 'iPad16,2' => 'iPad Mini (A17 Pro)',
+
+            // ==========================================
+            // 🚀 iPad Pro Series
+            // ==========================================
+            'iPad6,3' => 'iPad Pro 9.7-inch', 'iPad6,4' => 'iPad Pro 9.7-inch',
+            'iPad7,3' => 'iPad Pro 10.5-inch', 'iPad7,4' => 'iPad Pro 10.5-inch',
+            'iPad8,1' => 'iPad Pro 11-inch', 'iPad8,2' => 'iPad Pro 11-inch', 'iPad8,3' => 'iPad Pro 11-inch', 'iPad8,4' => 'iPad Pro 11-inch',
+            'iPad8,9' => 'iPad Pro 11-inch 2', 'iPad8,10' => 'iPad Pro 11-inch 2',
+            'iPad13,4' => 'iPad Pro 11-inch 3', 'iPad13,5' => 'iPad Pro 11-inch 3', 'iPad13,6' => 'iPad Pro 11-inch 3', 'iPad13,7' => 'iPad Pro 11-inch 3',
+            'iPad14,3' => 'iPad Pro 11-inch (M2)', 'iPad14,4' => 'iPad Pro 11-inch (M2)',
+            'iPad16,3' => 'iPad Pro 11-inch (M4)', 'iPad16,4' => 'iPad Pro 11-inch (M4)',
+            'iPad17,1' => 'iPad Pro 11-inch (M5)', 'iPad17,2' => 'iPad Pro 11-inch (M5)',
+            'iPad6,7' => 'iPad Pro 12.9-inch', 'iPad6,8' => 'iPad Pro 12.9-inch',
+            'iPad7,1' => 'iPad Pro 12.9-inch 2', 'iPad7,2' => 'iPad Pro 12.9-inch 2',
+            'iPad8,5' => 'iPad Pro 12.9-inch 3', 'iPad8,6' => 'iPad Pro 12.9-inch 3', 'iPad8,7' => 'iPad Pro 12.9-inch 3', 'iPad8,8' => 'iPad Pro 12.9-inch 3',
+            'iPad8,11' => 'iPad Pro 12.9-inch 4', 'iPad8,12' => 'iPad Pro 12.9-inch 4',
+            'iPad13,8' => 'iPad Pro 12.9-inch 5', 'iPad13,9' => 'iPad Pro 12.9-inch 5', 'iPad13,10' => 'iPad Pro 12.9-inch 5', 'iPad13,11' => 'iPad Pro 12.9-inch 5',
+            'iPad14,5' => 'iPad Pro 12.9-inch (M2)', 'iPad14,6' => 'iPad Pro 12.9-inch (M2)',
+            'iPad16,5' => 'iPad Pro 13-inch (M4)', 'iPad16,6' => 'iPad Pro 13-inch (M4)',
+            'iPad17,3' => 'iPad Pro 13-inch (M5)', 'iPad17,4' => 'iPad Pro 13-inch (M5)'
+        ];
+
+        $product = isset($apple_models[$product_raw]) ? $apple_models[$product_raw] : $product_raw;
     } else {
         $product = $product_raw;
     }
 
     $version = isset($_GET['DEVICE_VERSION']) ? htmlspecialchars($_GET['DEVICE_VERSION']) : '';
 
-    // ถ้ามีการส่งค่า PRODUCT_VERSION แบบรวมมาจาก get-udid.php แล้ว ให้ใช้ค่านั้นได้เลย
+    // การจัดการ PRODUCT_VERSION
     if (isset($_GET['PRODUCT_VERSION']) && $_GET['PRODUCT_VERSION'] !== '') {
         $product_version = htmlspecialchars($_GET['PRODUCT_VERSION']);
     } else {
@@ -65,12 +151,12 @@
     <title>Get UDID info</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     
-    <!-- ป้องกัน iOS แอบแปลงตัวเลขเป็นเบอร์โทรศัพท์ -->
+    <!-- ป้องกัน iOS แปลงตัวเลขเป็นลิงก์อัตโนมัติ -->
     <meta name="format-detection" content="telephone=no">
     <meta name="format-detection" content="date=no">
     <meta name="format-detection" content="address=no">
 
-    <!-- 🟢 ดึงไลบรารี GSAP 3 CDN -->
+    <!-- 🟢 GSAP 3 CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
     <style>
@@ -78,9 +164,9 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            -webkit-tap-highlight-color: transparent; /* เอาไฮไลท์สีฟ้า/ส้มตอนกดบนมือถือออก */
+            -webkit-tap-highlight-color: transparent;
             
-            /* 🟢 ป้องกันการกดค้าง / เมนู Context / ลากคลุมข้อความ (iOS, Android & PC) */
+            /* 🟢 ป้องกันการกดค้าง / Context Menu / Drag Text */
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             -khtml-user-select: none;
@@ -88,7 +174,6 @@
             -ms-user-select: none;
             user-select: none;
 
-            /* 🟢 ป้องกันการดึง/ลากปุ่ม หรือวัตถุในหน้าเว็บ (Drag & Drop) */
             -webkit-user-drag: none;
             -khtml-user-drag: none;
             -moz-user-drag: none;
@@ -107,7 +192,6 @@
             justify-content: center;
             align-items: center;
             
-            /* รองรับ Viewport Dynamic + ป้องกันการดันหลุดขอบบน */
             min-height: 100vh;
             min-height: 100dvh;
             overflow-y: auto;
@@ -185,7 +269,6 @@
             text-transform: uppercase;
         }
         
-        /* 🟢 กล่องข้อความ: ป้องกันการคลุมดำ/กดค้าง */
         .field-box {
             background: #0d1117;
             border: 1px solid #30363d;
@@ -197,7 +280,6 @@
             cursor: pointer;
             outline: none;
 
-            /* 🟢 ป้องกันการคลุมข้อความเฉพาะจุด */
             -webkit-touch-callout: none !important;
             -webkit-user-select: none !important;
             -khtml-user-select: none !important;
@@ -211,7 +293,6 @@
             pointer-events: none !important;
         }
 
-        /* 🟢 ครอบเฉพาะ Text Info เพื่อทำ GSAP Entrance Animation ตอนโหลด */
         .info-text {
             display: inline-block;
             opacity: 0;
@@ -242,7 +323,6 @@
             transform: none;
         }
 
-        /* 🟢 GSAP Toast Styling */
         .toast {
             position: fixed;
             bottom: 25px;
@@ -336,10 +416,8 @@
     <script>
         let toastTween;
 
-        // 🟢 ดักจับเหตุการณ์กดค้างในระดับ Global/Touch event ป้องกันเมนู context
         document.addEventListener('contextmenu', e => e.preventDefault());
 
-        // 🟢 GSAP Entrance Animation เฉพาะตัวอักษร Text Info ตอนแรก
         document.addEventListener("DOMContentLoaded", () => {
             gsap.to(".info-text", {
                 opacity: 1,
@@ -350,7 +428,6 @@
             });
         });
 
-        // 🟢 Copy Function + GSAP Toast Popup Animation
         function copyText(text, label) {
             if (text === 'N/A' || text === '') return;
 
@@ -358,10 +435,8 @@
                 const toast = document.getElementById('toast');
                 toast.innerText = `Copied ${label} to clipboard!`;
                 
-                // ถ้ารัน Toast อยู่แล้ว ให้กดยกเลิก Tween เก่าเพื่อเริ่มใหม่
                 if (toastTween) toastTween.kill();
 
-                // GSAP Toast: เด้งขึ้นมาจากล่าง -> ค้าง 1.5 วินาที -> ยุบจมกลับลงไป
                 toastTween = gsap.timeline()
                     .to(toast, {
                         opacity: 1,
