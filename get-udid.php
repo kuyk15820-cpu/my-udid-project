@@ -51,14 +51,19 @@ if (!empty($data)) {
             }
         }
 
-        // 🟢 ส่ง Parameter แยกกันเพื่อให้ udid-info.php นำไปแปลงชื่อไอโฟนได้
-        $params = "UDID=" . urlencode($UDID) .
-                  "&IMEI=" . urlencode($IMEI) .
-                  "&DEVICE_PRODUCT=" . urlencode($DEVICE_PRODUCT) .
-                  "&DEVICE_VERSION=" . urlencode($DEVICE_VERSION) .
-                  "&SERIAL=" . urlencode($SERIAL);
+        // รวมรหัสโมเดลตรงๆ (เช่น iPhone10,3) เข้ากับ Version (เช่น 20D67)
+        $product_version = $DEVICE_PRODUCT;
+        if (!empty($DEVICE_VERSION)) {
+            $product_version .= " / " . $DEVICE_VERSION;
+        }
 
-        // ⚠️ บังคับใช้ HTTP Status 301 Moved Permanently เท่านั้น เพื่อให้ iOS Profile Service สั่ง Safari เด้งเปิดหน้า udid-info.php
+        // ส่ง Parameter ต่อไปที่หน้า udid-info.php
+        $params = "UDID=" . urlencode($UDID) .
+          "&IMEI=" . urlencode($IMEI) .
+          "&DEVICE_PRODUCT=" . urlencode($DEVICE_PRODUCT) .
+          "&DEVICE_VERSION=" . urlencode($DEVICE_VERSION) .
+          "&SERIAL=" . urlencode($SERIAL);
+
         header("Location: udid-info.php?" . $params, true, 301);
         exit();
     }
