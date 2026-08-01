@@ -153,6 +153,8 @@
             margin-bottom: 4px;
             text-transform: uppercase;
         }
+        
+        /* 🟢 กล่องข้อความ: ป้องกันการคลุมดำ/กดค้าง */
         .field-box {
             background: #0d1117;
             border: 1px solid #30363d;
@@ -162,17 +164,22 @@
             font-size: 12px;
             word-break: break-all;
             cursor: pointer;
-            -webkit-user-select: text;
-            user-select: text;
-            outline: none; /* เอาขอบน้ำเงินเวลากดเลือกออก */
+            outline: none;
             transition: border-color 0.2s;
+
+            /* 🟢 ป้องกันการคลุมข้อความเฉพาะจุด */
+            -webkit-touch-callout: none !important;
+            -webkit-user-select: none !important;
+            -khtml-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
         }
         .field-box a {
             color: inherit !important;
             text-decoration: none !important;
             pointer-events: none !important;
         }
-        /* 🟢 กล่องข้อความ: ลบการย่อขยาย ลบการเปลี่ยนสีออกทั้งหมดเวลากดค้าง */
         .field-box:active, .field-box:focus {
             background: #0d1117;
             border-color: #30363d;
@@ -199,7 +206,6 @@
             opacity: 0;
             transform: translateY(15px);
         }
-        /* 🟢 ปุ่มกด: ลบการย่อขยาย ลบการเปลี่ยนสีออกทั้งหมดเวลากดค้าง */
         .btn:active, .btn:focus {
             background: #238636;
             outline: none;
@@ -241,7 +247,10 @@
             <!-- 1. UDID -->
             <div class="field-group">
                 <div class="field-label">UDID</div>
-                <div class="field-box" onclick="copyText(this, '<?php echo $udid; ?>', 'UDID')">
+                <div class="field-box" 
+                     oncontextmenu="return false;" 
+                     ondragstart="return false;" 
+                     onclick="copyText(this, '<?php echo $udid; ?>', 'UDID')">
                     <?php echo $udid; ?>
                 </div>
             </div>
@@ -249,7 +258,10 @@
             <!-- 2. IMEI -->
             <div class="field-group">
                 <div class="field-label">IMEI</div>
-                <div class="field-box" onclick="copyText(this, '<?php echo $imei; ?>', 'IMEI')">
+                <div class="field-box" 
+                     oncontextmenu="return false;" 
+                     ondragstart="return false;" 
+                     onclick="copyText(this, '<?php echo $imei; ?>', 'IMEI')">
                     <?php echo $imei; ?>
                 </div>
             </div>
@@ -257,7 +269,10 @@
             <!-- 3. PRODUCT / VERSION -->
             <div class="field-group">
                 <div class="field-label">PRODUCT / VERSION</div>
-                <div class="field-box" onclick="copyText(this, '<?php echo $product_version; ?>', 'PRODUCT / VERSION')">
+                <div class="field-box" 
+                     oncontextmenu="return false;" 
+                     ondragstart="return false;" 
+                     onclick="copyText(this, '<?php echo $product_version; ?>', 'PRODUCT / VERSION')">
                     <?php echo $product_version; ?>
                 </div>
             </div>
@@ -265,12 +280,15 @@
             <!-- 4. SERIAL -->
             <div class="field-group">
                 <div class="field-label">SERIAL</div>
-                <div class="field-box" onclick="copyText(this, '<?php echo $serial; ?>', 'SERIAL')">
+                <div class="field-box" 
+                     oncontextmenu="return false;" 
+                     ondragstart="return false;" 
+                     onclick="copyText(this, '<?php echo $serial; ?>', 'SERIAL')">
                     <?php echo $serial; ?>
                 </div>
             </div>
 
-            <!-- ปุ่มกลับหน้าแรก index.html (พร้อมการบล็อก Context Menu และ Dragging สำหรับ Android/PC) -->
+            <!-- ปุ่มกลับหน้าแรก index.html -->
             <button type="button" 
                     id="btnHome"
                     class="btn" 
@@ -287,18 +305,19 @@
     <script>
         let toastTween;
 
+        // 🟢 ดักจับเหตุการณ์กดค้างในระดับ Global/Touch event ป้องกันเมนู context
+        document.addEventListener('contextmenu', e => e.preventDefault());
+
         // 🟢 GSAP Initial Entrance Sequence
         document.addEventListener("DOMContentLoaded", () => {
             const tl = gsap.timeline();
 
-            // 1. Terminal Card ค่อยๆ ขยายใหญ่ขึ้นจากขนาด 0.95 -> 1
             tl.to("#terminalCard", {
                 opacity: 1,
                 scale: 1,
                 duration: 0.5,
                 ease: "power2.out"
             })
-            // 2. Fade In Badge, Heading, Subtext
             .to(["#statusBadge", "#mainHeading", "#subText"], {
                 opacity: 1,
                 y: 0,
@@ -306,7 +325,6 @@
                 stagger: 0.08,
                 ease: "power1.out"
             }, "-=0.2")
-            // 3. สไลด์ช่อง Field Data ขึ้นทีละช่อง (Stagger)
             .to(".field-group", {
                 opacity: 1,
                 y: 0,
@@ -314,7 +332,6 @@
                 stagger: 0.1,
                 ease: "power2.out"
             }, "-=0.1")
-            // 4. ปุ่ม Back to Home เด้งขึ้นปิดท้าย
             .to("#btnHome", {
                 opacity: 1,
                 y: 0,
@@ -337,10 +354,8 @@
                 const toast = document.getElementById('toast');
                 toast.innerText = `Copied ${label} to clipboard!`;
                 
-                // ถ้ารัน Toast อยู่แล้ว ให้กดยกเลิก Tween เก่าก่อน
                 if (toastTween) toastTween.kill();
 
-                // สร้าง Animation ป๊อปอัพขึ้นจากล่าง
                 toastTween = gsap.timeline()
                     .to(toast, {
                         opacity: 1,
