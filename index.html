@@ -11,12 +11,27 @@
         <meta name="format-detection" content="date=no">
         <meta name="format-detection" content="address=no">
 
+        <!-- 🟢 ดึงไลบรารี GSAP 3 CDN -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
         <style>
             * {
                 box-sizing: border-box;
                 margin: 0;
                 padding: 0;
-                -webkit-tap-highlight-color: transparent; /* 🟢 ปิดแถบสีไฮไลต์ตอนกดบน Safari/iOS */
+                -webkit-tap-highlight-color: transparent;
+                
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+
+                -webkit-user-drag: none;
+                -khtml-user-drag: none;
+                -moz-user-drag: none;
+                -o-user-drag: none;
             }
             html, body {
                 min-height: 100%;
@@ -31,7 +46,6 @@
                 justify-content: center;
                 align-items: center;
                 
-                /* 🟢 ป้องกัน Safari Toolbar ดันหน้าจอ และทำให้จัดให้อยู่ตรงกลางเสมอ */
                 min-height: 100vh;
                 min-height: 100dvh;
                 overflow-y: auto;
@@ -44,7 +58,7 @@
                 max-width: 440px;
                 box-shadow: 0 0 25px rgba(63, 185, 80, 0.15);
                 overflow: hidden;
-                margin: auto; /* การันตีว่าอยู่ตรงกลางทั้งแนวตั้งและแนวนอน */
+                margin: auto;
             }
             .terminal-header {
                 background: #21262d;
@@ -70,42 +84,94 @@
                 letter-spacing: 1px;
             }
             .terminal-body {
-                padding: 24px 20px; /* กระชับระยะขอบ ให้เห็นปุ่มชัดเจน */
+                padding: 24px 20px;
                 text-align: center;
             }
+            
+            /* 🟢 CSS สำหรับ Status Badge */
             .status-badge {
                 display: inline-flex;
                 align-items: center;
                 gap: 6px;
-                background: rgba(63, 185, 80, 0.1);
-                color: #2ea043;
-                border: 1px solid rgba(46, 160, 67, 0.3);
                 font-size: 10px;
                 padding: 3px 10px;
                 border-radius: 20px;
                 margin-bottom: 12px;
                 text-transform: uppercase;
                 letter-spacing: 1px;
+                transition: all 0.3s ease;
             }
-            .pulse-dot {
-                width: 6px;
-                height: 6px;
-                background-color: #3fb950;
-                border-radius: 50%;
-                box-shadow: 0 0 8px #3fb950;
-                animation: blink 1.5s infinite;
+
+            /* สถานะ Loading (สีฟ้า) */
+            .status-badge.loading {
+                background: rgba(88, 166, 255, 0.1);
+                color: #58a6ff;
+                border: 1px solid rgba(88, 166, 255, 0.3);
             }
-            @keyframes blink {
-                0%, 100% { opacity: 1; }
-                50% { opacity: 0.3; }
+
+            /* สถานะ Ready (สีเขียว) */
+            .status-badge.ready {
+                background: rgba(63, 185, 80, 0.1);
+                color: #2ea043;
+                border: 1px solid rgba(46, 160, 67, 0.3);
             }
+
+            /* 🟢 CSS Spinner สำหรับ Loading */
+            .spinner-icon {
+                width: 12px;
+                height: 12px;
+                animation: spin 0.8s linear infinite;
+            }
+            @keyframes spin {
+                100% { transform: rotate(360deg); }
+            }
+
+            /* 🟢 CSS สำหรับ Circle Checkmark Icon Animation */
+            .circle-checkmark-icon {
+                width: 13px;
+                height: 13px;
+                display: block;
+            }
+
+            .circle-path {
+                stroke: #3fb950;
+                stroke-dasharray: 44;
+                stroke-dashoffset: 44;
+                animation: drawCircle 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            }
+
+            .checkmark-path {
+                stroke: #3fb950;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+                stroke-dasharray: 12;
+                stroke-dashoffset: 12;
+                animation: drawCheck 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.6s forwards;
+            }
+
+            @keyframes drawCircle {
+                to { stroke-dashoffset: 0; }
+            }
+
+            @keyframes drawCheck {
+                to { stroke-dashoffset: 0; }
+            }
+
             .main-heading {
                 color: #f0f6fc;
                 font-size: 18px;
-                margin-bottom: 10px;
+                margin-bottom: 0px;
                 font-weight: bold;
                 line-height: 1.4;
             }
+
+            /* 🟢 ส่วนที่ซ่อนไว้เพื่อขยายทีหลังด้วย GSAP */
+            .expand-container {
+                height: 0;
+                opacity: 0;
+                overflow: hidden;
+            }
+
             .log-box {
                 background: #0d1117;
                 border: 1px solid #30363d;
@@ -119,6 +185,8 @@
             }
             .log-line {
                 margin-bottom: 4px;
+                opacity: 0;
+                transform: translateX(-10px);
             }
             .log-line:last-child {
                 margin-bottom: 0;
@@ -129,6 +197,7 @@
             .highlight {
                 color: #3fb950;
             }
+
             .btn {
                 display: block;
                 width: 100%;
@@ -141,11 +210,14 @@
                 font-weight: bold;
                 letter-spacing: 1px;
                 box-shadow: 0 4px 12px rgba(35, 134, 54, 0.3);
-                transition: all 0.2s ease;
+                transition: background 0.2s, box-shadow 0.2s;
                 border: 1px solid #2ea043;
                 outline: none;
+                cursor: pointer;
+                font-family: inherit;
+                opacity: 0;
+                transform: translateY(10px);
             }
-            /* 🟢 ลบการเปลี่ยนสี และการขึ้นกรอบดำเวลากด/โฟกัส */
             .btn:active, .btn:focus {
                 background: #238636;
                 box-shadow: 0 4px 12px rgba(35, 134, 54, 0.3);
@@ -164,22 +236,82 @@
             </div>
 
             <div class="terminal-body">
-                <div class="status-badge">
-                    <span class="pulse-dot"></span> SYSTEM READY
+                <!-- Status Badge เริ่มต้นที่สถานะ Loading -->
+                <div id="statusBadge" class="status-badge loading">
+                    <svg class="spinner-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="8" cy="8" r="6" stroke="#58a6ff" stroke-width="2" stroke-dasharray="28" stroke-dashoffset="10" />
+                    </svg>
+                    <span id="statusText">INITIALIZING...</span>
                 </div>
                 
                 <h1 class="main-heading">Get iOS Device UDID</h1>
 
-                <div class="log-box">
-                    <div class="log-line"><span class="accent">[STEP 1]</span> Tap button below to request profile</div>
-                    <div class="log-line"><span class="accent">[STEP 2]</span> Allow download in Safari browser</div>
-                    <div class="log-line"><span class="accent">[STEP 3]</span> Go to Settings -> Install Profile</div>
-                    <div class="log-line"><span class="highlight">[INFO]</span> System will collect UDID & Device Log</div>
-                </div>
+                <!-- 🟢 ครอบส่วนขยายด้วย container พิเศษเพื่อให้ GSAP สไลด์ขยายความสูงแบบ smooth -->
+                <div class="expand-container" id="expandContainer">
+                    <div class="log-box">
+                        <div class="log-line"><span class="accent">[STEP 1]</span> Tap button below to request profile</div>
+                        <div class="log-line"><span class="accent">[STEP 2]</span> Allow download in Safari browser</div>
+                        <div class="log-line"><span class="accent">[STEP 3]</span> Go to Settings -> Install Profile</div>
+                        <div class="log-line"><span class="highlight">[INFO]</span> System will collect UDID & Device Log</div>
+                    </div>
 
-                <a class="btn" href="get-mobileconfig.php">> GET PROFILE</a>
+                    <button type="button" 
+                            class="btn" 
+                            oncontextmenu="return false;" 
+                            ondragstart="return false;" 
+                            onclick="window.location.href='get-mobileconfig.php'">> GET PROFILE</button>
+                </div>
             </div>
         </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                setTimeout(() => {
+                    const badge = document.getElementById("statusBadge");
+                    badge.className = "status-badge ready";
+                    
+                    badge.innerHTML = `
+                        <svg class="circle-checkmark-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle class="circle-path" cx="8" cy="8" r="7" stroke-width="1.5" />
+                            <path class="checkmark-path" d="M5 8L7.2 10.2L11 5.8" stroke-width="1.8" />
+                        </svg>
+                        <span>SYSTEM READY</span>
+                    `;
+
+                    // 🟢 เรียกขยายกรอบการทำงานด้วย GSAP
+                    expandTerminalContent();
+                }, 1500); 
+            });
+
+            function expandTerminalContent() {
+                const container = document.getElementById("expandContainer");
+
+                const tl = gsap.timeline();
+
+                // Step 1: ยืดความสูงกรอบ Terminal ออกมาพอดีกับเนื้อหา
+                tl.to(container, {
+                    height: "auto",
+                    opacity: 1,
+                    duration: 0.5,
+                    ease: "power2.out"
+                })
+                // Step 2: ค่อยๆ พิมพ์ข้อความ Log ออกมาทีละบรรทัด (Stagger)
+                .to(".log-line", {
+                    opacity: 1,
+                    x: 0,
+                    duration: 0.25,
+                    stagger: 0.12,
+                    ease: "power1.out"
+                }, "-=0.1")
+                // Step 3: ปุ่มลอยสไลด์ขึ้นมาเด้งรับตอนท้าย
+                .to(".btn", {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.4,
+                    ease: "back.out(1.4)"
+                }, "-=0.1");
+            }
+        </script>
 
     </body>
 </html>
