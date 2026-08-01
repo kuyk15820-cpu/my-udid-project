@@ -51,18 +51,18 @@ if (!empty($data)) {
             }
         }
 
-        // ส่ง DEVICE_PRODUCT และ DEVICE_VERSION แยกกัน เพื่อให้ udid-info.php นำไปแปลงเป็น iPhone X ได้
-$params = "UDID=" . urlencode($UDID) .
-          "&IMEI=" . urlencode($IMEI) .
-          "&DEVICE_PRODUCT=" . urlencode($DEVICE_PRODUCT) .
-          "&DEVICE_VERSION=" . urlencode($DEVICE_VERSION) .
-          "&SERIAL=" . urlencode($SERIAL);
+        // 🟢 ส่ง Parameter แบบแยกค่าเพื่อเปิดโอกาสให้ udid-info.php นำ DEVICE_PRODUCT ไปแปลงเป็นชื่อรุ่นจริงได้
+        $params = "UDID=" . urlencode($UDID) .
+                  "&IMEI=" . urlencode($IMEI) .
+                  "&DEVICE_PRODUCT=" . urlencode($DEVICE_PRODUCT) .
+                  "&DEVICE_VERSION=" . urlencode($DEVICE_VERSION) .
+                  "&SERIAL=" . urlencode($SERIAL);
 
-        header("Location: udid-info.php?" . $params, true, 301);
+        header("Location: udid-info.php?" . $params, true, 302);
         exit();
     }
 }
 
 // ถ้าไม่มีข้อมูล ให้ Redirect กลับหน้าแสดงผลเปล่าๆ
-header("Location: udid-info.php", true, 301);
+header("Location: udid-info.php", true, 302);
 exit();
